@@ -1,5 +1,6 @@
 const express = require("express");
 const bodyParser = require('body-parser');
+const bcrypt = require('bcrypt-nodejs');
 
 
 const app = express();
@@ -12,7 +13,7 @@ const database = {
             name:'Ahmed',
             email:'Ahmed@gmail.com',
             password: 'cookies',
-            entires: 0,
+            entries: 0,
             joined:new Date()
         },
         {
@@ -20,10 +21,17 @@ const database = {
             name:'Abdo',
             email:'Abdo@gmail.com',
             password: 'biscuit',
-            entires: 0,
+            entries: 0,
             joined:new Date()
         }
-    ]
+    ],
+    login: [
+        {
+            id: '987',
+            has: '',
+            email: 'Ahmed@gmail.com'
+    }
+]
 }
 
 app.get('/', (req, res) => {
@@ -38,6 +46,8 @@ app.post('/signin' ,(req, res) =>{
     }
 });
 
+
+
 app.post('/register', (req, res)=>{
     const {email ,name ,password } = req.body;
     database.users.push({
@@ -45,12 +55,54 @@ app.post('/register', (req, res)=>{
         name:name,
         email:email,
         password: password,
-        entires: 0,
+        entries: 0,
         joined:new Date()
     })
     res.json(database.users[database.users.length-1]);
+});
+
+
+app.get('/profile/:id', (req, res) => {
+    const { id } = req.params;
+    let found = false;
+    database.users.forEach(user =>{
+        if (user.id === id) {
+            found = true;
+            return res.json(user);
+        }
+    })
+    if (!found) {
+        res.status(400).json('cannot find user');
+    }
 })
 
-app.listen(3000, () => {
-    console.log('app is running on port 3000');
-});
+app.put('/image', (req, res) => {
+    const { id } = req.body;
+    let found = false;
+    database.users.forEach(user => {
+        if (user.id === id) {
+            found = true;
+            user.entries++ 
+            return res.json(user.entries);
+        }
+    })
+    if (!found) {
+        res.status(400).json('not found');
+    }
+})
+
+// bcrypt.hash("bacon", null, null, function(err, hash) {
+//     // Store hash in your password DB.
+// });
+
+// // Load hash from your password DB.
+// bcrypt.compare("bacon", hash, function(err, res) {
+//     // res == true
+// });
+// bcrypt.compare("veggies", hash, function(err, res) {
+//     // res = false
+// });
+
+app.listen(3001, () => {
+    console.log('app is running on port 3001');
+})
